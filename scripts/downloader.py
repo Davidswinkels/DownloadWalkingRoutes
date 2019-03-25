@@ -1,6 +1,7 @@
 import requests
 import geopandas as gpd
 
+
 def store_bytes_to_filepath(content, filepath):
     with open(filepath, 'wb') as file:
         file.write(content)

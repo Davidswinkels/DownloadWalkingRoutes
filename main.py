@@ -3,10 +3,44 @@ import fiona
 from shapely.geometry import shape
 import geopandas as gpd
 import matplotlib.pyplot as plt
-
+import requests
 
 ## Constant variables
+route_search_url = "https://api.routeyou.com/2.0/json/Route/k-9aec2fc1705896b901c3ea17d6223f0a/mapSearch"
 route_url = "https://download.routeyou.com/k-9aec2fc1705896b901c3ea17d6223f0a/route/5653357.gpx?language=nl"
+route_search_headers = {"Accept": "*/*",
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "Accept-Language": "nl,en-US;q=0.7,en;q=0.3",
+                        "Connection": "keep-alive",
+                        "Content-Length": "331",
+                        "Content-Type": "text/plain;charset=UTF-8",
+                        "DNT": "1",
+                        "Host": "api.routeyou.com",
+                        "Origin": "https://www.routeyou.com",
+                        "Referer": "https://www.routeyou.com/route/search/2/walking-route-search",
+                        "TE": "Trailers",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0"}
+
+route_search_params = {"jsonrpc": "2.0",
+                       "id": "3",
+                       "method": "searchAdvanced",
+                       "params": [{"bounds": {"min": {"lat": 50.400370273479346,
+                                                      "lon": 4.974064280094581},
+                                              "max": {"lat": 52.118895633404020,
+                                                      "lon": 6.819767405094581}},
+                                   "type.id": 2,
+                                   "score.min": 0.5,
+                                   "bounds.comparator": "geometry"},
+                                  "null",
+                                  20,
+                                  0,
+                                  {"clusters": "false",
+                                   "addLanguage":"en",
+                                   "media": "true",
+                                   "description": "true"}]}
+route_search_data = {"mimeType": "text/plain;charset=UTF-8",
+                     "params": [],
+                     "text": "{\"jsonrpc\":\"2.0\",\"id\":\"4942\",\"method\":\"searchAdvanced\",\"params\":[{\"bounds\":{\"min\":{\"lat\":50.400370273479346,\"lon\":4.974064280094581},\"max\":{\"lat\":52.11889563340402,\"lon\":6.819767405094581}},\"type.id\":2,\"score.min\":0.5,\"bounds.comparator\":\"geometry\"},null,20,0,{\"clusters\":false,\"addLanguage\":\"en\",\"media\":true,\"description\":true}]}"}
 default_headers = {"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                    "Accept-Encoding": "gzip, deflate, br",
                    "Accept-Language": "nl,en-US;q=0.7,en;q=0.3",
@@ -23,32 +57,39 @@ default_headers = {"Accept": "text/html,application/xhtml+xml,application/xml;q=
                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0"}
 filepath = "C:/Users/David/Downloads/Wandelroutes/5653357.gpx"
 
-rows_list = []
-input_rows = [1, 2, 3]
+## Setup script
+
+response = requests.post(url=route_search_url, headers=route_search_headers,
+                         data=route_search_data)
+print(response)
+print(response.content)
+
+# rows_list = []
+# input_rows = [1, 2, 3]
 # download_to_file(route_url, default_headers, filepath)
-for row in input_rows:
-
-    layer = fiona.open(filepath, layer='tracks')
-    geom = layer[0]
-    route_name = geom['properties']['name']
-    route_geodata = {'type': 'MultiLineString',
-                     'coordinates': geom['geometry']['coordinates']}
-    print(route_geodata)
-    route_geometry = shape(route_geodata)
-    route_dict = {'name': route_name,
-                  'geometry': route_geometry}
-    rows_list.append(route_dict)
-
-
-print(rows_list)
-routes_gdf = gpd.GeoDataFrame(rows_list)
-routes_gdf.crs = {'init': 'epsg:426', 'no_defs': True}
-print(routes_gdf.crs)
-routes_gdf.to_crs({'init': 'epsg:28992'})
-routes_gdf.plot()
-plt.show()
-print(routes_gdf.geometry)
-print(routes_gdf.crs)
+# for row in input_rows:
+#
+#     layer = fiona.open(filepath, layer='tracks')
+#     geom = layer[0]
+#     route_name = geom['properties']['name']
+#     route_geodata = {'type': 'MultiLineString',
+#                      'coordinates': geom['geometry']['coordinates']}
+#     print(route_geodata)
+#     route_geometry = shape(route_geodata)
+#     route_dict = {'name': route_name,
+#                   'geometry': route_geometry}
+#     rows_list.append(route_dict)
+#
+#
+# print(rows_list)
+# routes_gdf = gpd.GeoDataFrame(rows_list)
+# routes_gdf.crs = {'init': 'epsg:4326', 'no_defs': True}
+# print(routes_gdf.crs)
+# # routes_gdf.to_crs({'init': 'epsg:28992'})
+# routes_gdf.plot()
+# plt.show()
+# print(routes_gdf.geometry)
+# print(routes_gdf.crs)
 
 
 
